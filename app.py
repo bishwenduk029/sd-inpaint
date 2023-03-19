@@ -7,7 +7,7 @@ import imghdr
 from pathlib import Path
 from typing import Union
 from PIL import Image
-from model.sd import SD15
+from sd import SD15
 from schema import Config
 from helper import (
     load_img,

@@ -4,10 +4,9 @@ from typing import Optional
 import cv2
 import torch
 import numpy as np
-from loguru import logger
 
-from lama_cleaner.helper import boxes_from_mask, resize_max_size, pad_img_to_modulo, switch_mps_device
-from lama_cleaner.schema import Config, HDStrategy
+from helper import boxes_from_mask, resize_max_size, pad_img_to_modulo, switch_mps_device
+from schema import Config, HDStrategy
 
 
 class InpaintModel:
@@ -53,8 +52,6 @@ class InpaintModel:
             mask, mod=self.pad_mod, square=self.pad_to_square, min_size=self.min_size
         )
 
-        logger.info(f"final forward pad size: {pad_image.shape}")
-
         result = self.forward(pad_image, pad_mask, config)
         result = result[0:origin_height, 0:origin_width, :]
 
@@ -75,10 +72,8 @@ class InpaintModel:
         return: BGR IMAGE
         """
         inpaint_result = None
-        logger.info(f"hd_strategy: {config.hd_strategy}")
         if config.hd_strategy == HDStrategy.CROP:
             if max(image.shape) > config.hd_strategy_crop_trigger_size:
-                logger.info(f"Run crop strategy")
                 boxes = boxes_from_mask(mask)
                 crop_result = []
                 for box in boxes:
@@ -100,9 +95,6 @@ class InpaintModel:
                     mask, size_limit=config.hd_strategy_resize_limit
                 )
 
-                logger.info(
-                    f"Run resize strategy, origin size: {image.shape} forward size: {downsize_image.shape}"
-                )
                 inpaint_result = self._pad_forward(
                     downsize_image, downsize_mask, config
                 )
@@ -170,8 +162,6 @@ class InpaintModel:
 
         crop_img = image[t:b, l:r, :]
         crop_mask = mask[t:b, l:r]
-
-        logger.info(f"box size: ({box_h},{box_w}) crop size: {crop_img.shape}")
 
         return crop_img, crop_mask, [l, t, r, b]
 
@@ -273,9 +263,6 @@ class DiffusionInpaintModel(InpaintModel):
         origin_size = image.shape[:2]
         downsize_image = resize_max_size(image, size_limit=longer_side_length)
         downsize_mask = resize_max_size(mask, size_limit=longer_side_length)
-        logger.info(
-            f"Resize image to do sd inpainting: {image.shape} -> {downsize_image.shape}"
-        )
         inpaint_result = self._pad_forward(downsize_image, downsize_mask, config)
         # only paste masked area result
         inpaint_result = cv2.resize(
