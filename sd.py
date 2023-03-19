@@ -14,11 +14,11 @@ from diffusers import (
     DPMSolverMultistepScheduler,
 )
 
-from base import DiffusionInpaintModel
-from schema import Config, SDSampler
+import base
+import schema
 
 
-class SD(DiffusionInpaintModel):
+class SD(base.DiffusionInpaintModel):
     pad_mod = 8
     min_size = 512
 
@@ -48,7 +48,7 @@ class SD(DiffusionInpaintModel):
 
         self.callback = kwargs.pop("callback", None)
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: schema.Config):
         """Input image and output image have same size
         image: [H, W, C] RGB
         mask: [H, W, 1] 255 means area to repaint
@@ -57,17 +57,17 @@ class SD(DiffusionInpaintModel):
 
         scheduler_config = self.model.scheduler.config
 
-        if config.sd_sampler == SDSampler.ddim:
+        if config.sd_sampler == schema.SDSampler.ddim:
             scheduler = DDIMScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.pndm:
+        elif config.sd_sampler == schema.SDSampler.pndm:
             scheduler = PNDMScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.k_lms:
+        elif config.sd_sampler == schema.SDSampler.k_lms:
             scheduler = LMSDiscreteScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.k_euler:
+        elif config.sd_sampler == schema.SDSampler.k_euler:
             scheduler = EulerDiscreteScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.k_euler_a:
+        elif config.sd_sampler == schema.SDSampler.k_euler_a:
             scheduler = EulerAncestralDiscreteScheduler.from_config(scheduler_config)
-        elif config.sd_sampler == SDSampler.dpm_plus_plus:
+        elif config.sd_sampler == schema.SDSampler.dpm_plus_plus:
             scheduler = DPMSolverMultistepScheduler.from_config(scheduler_config)
         else:
             raise ValueError(config.sd_sampler)
