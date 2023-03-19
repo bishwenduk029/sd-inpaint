@@ -39,7 +39,7 @@ class InpaintModel:
         """Input images and output images have same size
         images: [H, W, C] RGB
         masks: [H, W, 1] 255 为 masks 区域
-        return: BGR IMAGE
+        return: BGR IMAGEs
         """
         ...
 
