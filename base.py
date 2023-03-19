@@ -21,7 +21,6 @@ class InpaintModel:
         Args:
             device:
         """
-        device = helper.switch_mps_device(self.name, device)
         self.device = device
         self.init_model(device, **kwargs)
 
