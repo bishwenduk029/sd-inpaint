@@ -7,8 +7,8 @@ import imghdr
 from pathlib import Path
 from typing import Union
 from PIL import Image
-from sd import SD15
-from schema import Config
+import sd
+import schema
 from helper import (
     load_img,
     numpy_to_bytes,
@@ -25,7 +25,7 @@ def init():
     global model
 
     torch_dtype = torch.float16
-    model = SD15(torch_dtype)
+    model = schema.SD15(torch_dtype)
 
 # Inference is ran for every server call
 # Reference your preloaded global model variable here.
@@ -40,6 +40,7 @@ def inference(model_inputs: dict) -> dict:
     global model
 
     # Parse out your arguments
+    print(model_inputs)
     prompt = model_inputs.get('prompt', None)
     if prompt == None:
         return {'message': "No prompt provided"}
@@ -77,7 +78,7 @@ def inference(model_inputs: dict) -> dict:
     else:
         paint_by_example_example_image = None
 
-    config = Config(
+    config = schema.Config(
         ldm_steps=form["ldmSteps"],
         ldm_sampler=form["ldmSampler"],
         hd_strategy=form["hdStrategy"],

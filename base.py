@@ -5,8 +5,8 @@ import cv2
 import torch
 import numpy as np
 
-from helper import boxes_from_mask, resize_max_size, pad_img_to_modulo, switch_mps_device
-from schema import Config, HDStrategy
+import helper
+import schema
 
 
 class InpaintModel:
@@ -21,7 +21,7 @@ class InpaintModel:
         Args:
             device:
         """
-        device = switch_mps_device(self.name, device)
+        device = helper.switch_mps_device(self.name, device)
         self.device = device
         self.init_model(device, **kwargs)
 
@@ -35,7 +35,7 @@ class InpaintModel:
         ...
 
     @abc.abstractmethod
-    def forward(self, image, mask, config: Config):
+    def forward(self, image, mask, config: schema.Config):
         """Input images and output images have same size
         images: [H, W, C] RGB
         masks: [H, W, 1] 255 为 masks 区域
@@ -43,12 +43,12 @@ class InpaintModel:
         """
         ...
 
-    def _pad_forward(self, image, mask, config: Config):
+    def _pad_forward(self, image, mask, config: schema.Config):
         origin_height, origin_width = image.shape[:2]
-        pad_image = pad_img_to_modulo(
+        pad_image = helper.pad_img_to_modulo(
             image, mod=self.pad_mod, square=self.pad_to_square, min_size=self.min_size
         )
-        pad_mask = pad_img_to_modulo(
+        pad_mask = helper.pad_img_to_modulo(
             mask, mod=self.pad_mod, square=self.pad_to_square, min_size=self.min_size
         )
 
@@ -65,16 +65,16 @@ class InpaintModel:
         return result, image, mask
 
     @torch.no_grad()
-    def __call__(self, image, mask, config: Config):
+    def __call__(self, image, mask, config: schema.Config):
         """
         images: [H, W, C] RGB, not normalized
         masks: [H, W]
         return: BGR IMAGE
         """
         inpaint_result = None
-        if config.hd_strategy == HDStrategy.CROP:
+        if config.hd_strategy == schema.HDStrategy.CROP:
             if max(image.shape) > config.hd_strategy_crop_trigger_size:
-                boxes = boxes_from_mask(mask)
+                boxes = helper.boxes_from_mask(mask)
                 crop_result = []
                 for box in boxes:
                     crop_image, crop_box = self._run_box(image, mask, box, config)
@@ -85,13 +85,13 @@ class InpaintModel:
                     x1, y1, x2, y2 = crop_box
                     inpaint_result[y1:y2, x1:x2, :] = crop_image
 
-        elif config.hd_strategy == HDStrategy.RESIZE:
+        elif config.hd_strategy == schema.HDStrategy.RESIZE:
             if max(image.shape) > config.hd_strategy_resize_limit:
                 origin_size = image.shape[:2]
-                downsize_image = resize_max_size(
+                downsize_image = helper.resize_max_size(
                     image, size_limit=config.hd_strategy_resize_limit
                 )
-                downsize_mask = resize_max_size(
+                downsize_mask = helper.resize_max_size(
                     mask, size_limit=config.hd_strategy_resize_limit
                 )
 
@@ -115,7 +115,7 @@ class InpaintModel:
 
         return inpaint_result
 
-    def _crop_box(self, image, mask, box, config: Config):
+    def _crop_box(self, image, mask, box, config: schema.Config):
         """
 
         Args:
@@ -203,7 +203,7 @@ class InpaintModel:
 
         return result
 
-    def _apply_cropper(self, image, mask, config: Config):
+    def _apply_cropper(self, image, mask, config: schema.Config):
         img_h, img_w = image.shape[:2]
         l, t, w, h = (
             config.croper_x,
@@ -223,7 +223,7 @@ class InpaintModel:
         crop_mask = mask[t:b, l:r]
         return crop_img, crop_mask, (l, t, r, b)
 
-    def _run_box(self, image, mask, box, config: Config):
+    def _run_box(self, image, mask, box, config: schema.Config):
         """
 
         Args:
@@ -241,7 +241,7 @@ class InpaintModel:
 
 class DiffusionInpaintModel(InpaintModel):
     @torch.no_grad()
-    def __call__(self, image, mask, config: Config):
+    def __call__(self, image, mask, config: schema.Config):
         """
         images: [H, W, C] RGB, not normalized
         masks: [H, W]
@@ -258,11 +258,11 @@ class DiffusionInpaintModel(InpaintModel):
 
         return inpaint_result
 
-    def _scaled_pad_forward(self, image, mask, config: Config):
+    def _scaled_pad_forward(self, image, mask, config: schema.Config):
         longer_side_length = int(config.sd_scale * max(image.shape[:2]))
         origin_size = image.shape[:2]
-        downsize_image = resize_max_size(image, size_limit=longer_side_length)
-        downsize_mask = resize_max_size(mask, size_limit=longer_side_length)
+        downsize_image = helper.resize_max_size(image, size_limit=longer_side_length)
+        downsize_mask = helper.resize_max_size(mask, size_limit=longer_side_length)
         inpaint_result = self._pad_forward(downsize_image, downsize_mask, config)
         # only paste masked area result
         inpaint_result = cv2.resize(
