@@ -5,8 +5,8 @@ import cv2
 import torch
 import numpy as np
 
-from . import helper
-from . import schema
+import helper
+import schema
 
 
 class InpaintModel:
