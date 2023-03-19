@@ -27,23 +27,11 @@ class SD(base.DiffusionInpaintModel):
 
         HF_AUTH_TOKEN = os.getenv('HF_AUTH_TOKEN')
 
-        model_kwargs = {
-            "local_files_only": kwargs.get("local_files_only", kwargs["sd_run_local"])
-        }
-        model_kwargs.update(
-            dict(
-                safety_checker=None,
-                feature_extractor=None,
-                requires_safety_checker=False,
-            )
-        )
-
         torch_dtype = torch.float16
         self.model = StableDiffusionInpaintPipeline.from_pretrained(
             self.model_id_or_path,
             torch_dtype=torch_dtype,
-            use_auth_token=HF_AUTH_TOKEN,
-            **model_kwargs
+            use_auth_token=HF_AUTH_TOKEN
         )
 
         self.callback = kwargs.pop("callback", None)

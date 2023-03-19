@@ -46,12 +46,32 @@ def inference(model_inputs: dict) -> dict:
         return {'message': "No prompt provided"}
 
     # Run the model
-    input = model_inputs.get('files')
+    input = model_inputs.get('image')
     # RGB
-    origin_image_bytes = input["image"].read()
+    # Base64 encoded image string
+    base64_string = model_inputs.get('image').read()
+    # Decode the Base64 string to raw bytes
+    image_bytes = base64.b64decode(base64_string)
+
+    # Convert the raw bytes to an image object
+    image = Image.open(io.BytesIO(image_bytes))
+
+    # Convert the image object to RGB bytes
+    origin_image_bytes = image.tobytes()
     image, alpha_channel, exif = load_img(origin_image_bytes, return_exif=True)
 
-    mask, _ = load_img(input["mask"].read(), gray=True)
+    # Base64 encoded image string
+    base64_string = model_inputs.get('mask').read()
+    # Decode the Base64 string to raw bytes
+    image_bytes = base64.b64decode(base64_string)
+
+    # Convert the raw bytes to an image object
+    image = Image.open(io.BytesIO(image_bytes))
+
+    # Convert the image object to RGB bytes
+    mask_bytes = image.tobytes()
+
+    mask, _ = load_img(mask_bytes, gray=True)
     mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)[1]
 
     if image.shape[:2] != mask.shape[:2]:
