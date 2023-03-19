@@ -2,7 +2,7 @@ sanic==22.6.2
 accelerate
 torch
 scipy
-opencv-python
+opencv-python-headless
 diffusers[torch]==0.12.1
 transformers>=4.25.1
 tqdm
