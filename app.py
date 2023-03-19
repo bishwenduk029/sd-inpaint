@@ -7,9 +7,9 @@ import imghdr
 from pathlib import Path
 from typing import Union
 from PIL import Image
-from . import sd
+import sd
 import schema
-from .helper import (
+from helper import (
     load_img,
     numpy_to_bytes,
     resize_max_size,
