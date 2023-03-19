@@ -23,6 +23,7 @@ RUN python3 download.py
 # Add your custom app code, init() and inference()
 ADD utils.py .
 ADD helper.py .
+ADD base.py .
 ADD __init__.py .
 ADD schema.py .
 ADD sd.py .
