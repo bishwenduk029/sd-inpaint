@@ -3,11 +3,10 @@ import PIL.Image
 import cv2
 import torch
 from diffusers import DiffusionPipeline
-from loguru import logger
 
-from lama_cleaner.model.base import DiffusionInpaintModel
-from lama_cleaner.model.utils import set_seed
-from lama_cleaner.schema import Config
+from .base import DiffusionInpaintModel
+from .utils import set_seed
+from .schema import Config
 
 
 class PaintByExample(DiffusionInpaintModel):
@@ -22,7 +21,6 @@ class PaintByExample(DiffusionInpaintModel):
         model_kwargs = {"local_files_only": kwargs.get('local_files_only', False)}
 
         if kwargs['disable_nsfw'] or kwargs.get('cpu_offload', False):
-            logger.info("Disable Paint By Example Model NSFW checker")
             model_kwargs.update(dict(
                 safety_checker=None,
                 requires_safety_checker=False

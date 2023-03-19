@@ -7,9 +7,9 @@ import imghdr
 from pathlib import Path
 from typing import Union
 from PIL import Image
-import sd
+from . import sd
 import schema
-from helper import (
+from .helper import (
     load_img,
     numpy_to_bytes,
     resize_max_size,
@@ -25,7 +25,7 @@ def init():
     global model
 
     torch_dtype = torch.float16
-    model = schema.SD15(torch_dtype)
+    model = sd.SD15(torch_dtype)
 
 # Inference is ran for every server call
 # Reference your preloaded global model variable here.

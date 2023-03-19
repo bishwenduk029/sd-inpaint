@@ -14,8 +14,8 @@ from diffusers import (
     DPMSolverMultistepScheduler,
 )
 
-import base
-import schema
+from . import base
+from . schema
 
 
 class SD(base.DiffusionInpaintModel):

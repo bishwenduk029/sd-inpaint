@@ -1,11 +1,10 @@
 import PIL.Image
 import cv2
 import torch
-from loguru import logger
 
-from lama_cleaner.model.base import DiffusionInpaintModel
-from lama_cleaner.model.utils import set_seed
-from lama_cleaner.schema import Config
+from .base import DiffusionInpaintModel
+from .utils import set_seed
+from .schema import Config
 
 
 class InstructPix2Pix(DiffusionInpaintModel):
@@ -19,7 +18,6 @@ class InstructPix2Pix(DiffusionInpaintModel):
 
         model_kwargs = {"local_files_only": kwargs.get('local_files_only', False)}
         if kwargs['disable_nsfw'] or kwargs.get('cpu_offload', False):
-            logger.info("Disable Stable Diffusion Model NSFW checker")
             model_kwargs.update(dict(
                 safety_checker=None,
                 feature_extractor=None,
@@ -40,7 +38,6 @@ class InstructPix2Pix(DiffusionInpaintModel):
             self.model.enable_xformers_memory_efficient_attention()
 
         if kwargs.get('cpu_offload', False) and use_gpu:
-            logger.info("Enable sequential cpu offload")
             self.model.enable_sequential_cpu_offload(gpu_id=0)
         else:
             self.model = self.model.to(device)
