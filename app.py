@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Union
 from PIL import Image
 import sd
+import requests
 import schema
 from helper import (
     load_img,
@@ -36,27 +37,27 @@ def get_image_ext(img_bytes):
         w = "jpeg"
     return w
 
-def get_image_bytes(image_base64_string: str):
-    image_bytes = base64.b64decode(image_base64_string)
+def get_image_bytes(image_url: str):
+    response = requests.get(image_url)
 
     # Convert the raw bytes to an image object
-    image = Image.open(io.BytesIO(image_bytes))
-    return image.tobytes()
+    image_bytes = response.content
+    return image_bytes
 
 def inference(model_inputs: dict) -> dict:
     global model
 
     # Run the model
-    input_base64_string = model_inputs.get('image')
-    mask_base64_string = model_inputs.get('mask')
+    input_url = model_inputs.get('image')
+    mask_url = model_inputs.get('mask')
     # RGB
 
     # Convert the image object to RGB bytes
-    origin_image_bytes = get_image_bytes(input_base64_string)
+    origin_image_bytes = get_image_bytes(input_url)
     image, alpha_channel, exif = load_img(origin_image_bytes, return_exif=True)
 
     # Convert the image object to RGB bytes
-    mask_bytes = get_image_bytes(mask_base64_string)
+    mask_bytes = get_image_bytes(mask_url)
 
     mask, _ = load_img(mask_bytes, gray=True)
     mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)[1]
