@@ -33,7 +33,7 @@ def init():
         "runwayml/stable-diffusion-inpainting",
         torch_dtype=torch_dtype,
         use_auth_token=hf_auth_token
-    )
+    ).to("cuda")
 
 # Inference is ran for every server call
 # Reference your preloaded global model variable here.
