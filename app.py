@@ -145,6 +145,7 @@ def inference(model_inputs: dict) -> dict:
     try:
         res_np_img = inpaint_model(image, mask, config)
     except RuntimeError as e:
+        print(str(e))
         torch.cuda.empty_cache()
         if "CUDA out of memory. " in str(e):
             # NOTE: the string may change?
