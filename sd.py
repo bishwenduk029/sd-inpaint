@@ -13,7 +13,7 @@ from diffusers import (
     EulerAncestralDiscreteScheduler,
     DPMSolverMultistepScheduler,
 )
-
+from torch import autocast
 import base
 import schema
 
@@ -58,20 +58,22 @@ class SD(base.DiffusionInpaintModel):
             mask = cv2.GaussianBlur(mask, (k, k), 0)[:, :, np.newaxis]
 
         img_h, img_w = image.shape[:2]
+        print(config.prompt)
 
-        output = self.model(
-            image=PIL.Image.fromarray(image),
-            prompt=config.prompt,
-            negative_prompt=config.negative_prompt,
-            mask_image=PIL.Image.fromarray(mask[:, :, -1], mode="L"),
-            num_inference_steps=config.sd_steps,
-            guidance_scale=config.sd_guidance_scale,
-            output_type="np.array",
-            callback=self.callback,
-            height=img_h,
-            width=img_w,
-            generator=torch.manual_seed(config.sd_seed),
-        ).images[0]
+        with autocast("cuda"):
+            output = self.model(
+                image=PIL.Image.fromarray(image),
+                prompt=config.prompt,
+                negative_prompt=config.negative_prompt,
+                mask_image=PIL.Image.fromarray(mask[:, :, -1], mode="L"),
+                num_inference_steps=config.sd_steps,
+                guidance_scale=config.sd_guidance_scale,
+                output_type="np.array",
+                callback=self.callback,
+                height=img_h,
+                width=img_w,
+                generator=torch.manual_seed(config.sd_seed),
+            ).images[0]
 
         output = (output * 255).round().astype("uint8")
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
