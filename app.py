@@ -81,14 +81,14 @@ def inference(model_inputs: dict) -> dict:
     else:
         size_limit = int(size_limit)
 
-    if "paintByExampleImage" in input:
-        paint_by_example_example_image, _ = load_img(
-            input["paintByExampleImage"].read()
-        )
-        paint_by_example_example_image = Image.fromarray(
-            paint_by_example_example_image)
-    else:
-        paint_by_example_example_image = None
+    # if "paintByExampleImage" in input:
+    #     paint_by_example_example_image, _ = load_img(
+    #         input["paintByExampleImage"].read()
+    #     )
+    #     paint_by_example_example_image = Image.fromarray(
+    #         paint_by_example_example_image)
+    # else:
+    #     paint_by_example_example_image = None
 
     config = schema.Config(
         ldm_steps=form["ldmSteps"],
@@ -120,7 +120,7 @@ def inference(model_inputs: dict) -> dict:
         paint_by_example_mask_blur=form["paintByExampleMaskBlur"],
         paint_by_example_seed=form["paintByExampleSeed"],
         paint_by_example_match_histograms=form["paintByExampleMatchHistograms"],
-        paint_by_example_example_image=paint_by_example_example_image,
+        paint_by_example_example_image="",
         p2p_steps=form["p2pSteps"],
         p2p_image_guidance_scale=form["p2pImageGuidanceScale"],
         p2p_guidance_scale=form["p2pGuidanceScale"],
