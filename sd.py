@@ -22,17 +22,8 @@ class SD(base.DiffusionInpaintModel):
     pad_mod = 8
     min_size = 512
 
-    def init_model(self, device: torch.device, **kwargs):
-        from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
-
-        HF_AUTH_TOKEN = os.getenv('HF_AUTH_TOKEN')
-
-        torch_dtype = torch.float16
-        self.model = StableDiffusionInpaintPipeline.from_pretrained(
-            self.model_id_or_path,
-            torch_dtype=torch_dtype,
-            use_auth_token=HF_AUTH_TOKEN
-        )
+    def init_model(self, model, **kwargs):
+        self.model = model
 
         self.callback = kwargs.pop("callback", None)
 

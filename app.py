@@ -17,6 +17,7 @@ from helper import (
     pil_to_bytes,
 )
 import base64
+from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
 
 # Init is ran on server startup
 # Load your model to GPU as a global variable here using the variable name "model"
@@ -26,16 +27,22 @@ def init():
     global model
 
     torch_dtype = torch.float16
-    model = sd.SD15(torch_dtype)
+    model = model = StableDiffusionInpaintPipeline.from_pretrained(
+        "runwayml/stable-diffusion-inpainting",
+        torch_dtype=torch_dtype,
+        use_auth_token=HF_AUTH_TOKEN
+    )
 
 # Inference is ran for every server call
 # Reference your preloaded global model variable here.
+
 
 def get_image_ext(img_bytes):
     w = imghdr.what("", img_bytes)
     if w is None:
         w = "jpeg"
     return w
+
 
 def get_image_bytes(image_url: str):
     response = requests.get(image_url)
@@ -44,8 +51,11 @@ def get_image_bytes(image_url: str):
     image_bytes = response.content
     return image_bytes
 
+
 def inference(model_inputs: dict) -> dict:
     global model
+
+    inpaint_model = sd.SD15(model)
 
     # Run the model
     input_url = model_inputs.get('image')
@@ -71,7 +81,7 @@ def inference(model_inputs: dict) -> dict:
     interpolation = cv2.INTER_CUBIC
 
     form = model_inputs.get("form")
-        # Parse out your arguments
+    # Parse out your arguments
     prompt = form['prompt']
     if prompt == None:
         return {'message': "No prompt provided"}
@@ -124,16 +134,14 @@ def inference(model_inputs: dict) -> dict:
     if config.paint_by_example_seed == -1:
         config.paint_by_example_seed = random.randint(1, 999999999)
 
-    
     image = resize_max_size(image, size_limit=size_limit,
                             interpolation=interpolation)
 
     mask = resize_max_size(mask, size_limit=size_limit,
                            interpolation=interpolation)
 
-
     try:
-        res_np_img = model(image, mask, config)
+        res_np_img = inpaint_model(image, mask, config)
     except RuntimeError as e:
         torch.cuda.empty_cache()
         if "CUDA out of memory. " in str(e):
