@@ -46,11 +46,6 @@ def get_image_bytes(image_base64_string: str):
 def inference(model_inputs: dict) -> dict:
     global model
 
-    # Parse out your arguments
-    prompt = model_inputs.get('prompt', None)
-    if prompt == None:
-        return {'message': "No prompt provided"}
-
     # Run the model
     input_base64_string = model_inputs.get('image')
     mask_base64_string = model_inputs.get('mask')
@@ -75,6 +70,10 @@ def inference(model_inputs: dict) -> dict:
     interpolation = cv2.INTER_CUBIC
 
     form = model_inputs.get("form")
+        # Parse out your arguments
+    prompt = form['prompt']
+    if prompt == None:
+        return {'message': "No prompt provided"}
     size_limit: Union[int, str] = form.get("sizeLimit", "1080")
     if size_limit == "Original":
         size_limit = max(image.shape)
