@@ -36,40 +36,32 @@ def get_image_ext(img_bytes):
         w = "jpeg"
     return w
 
+def get_image_bytes(image_base64_string: str):
+    image_bytes = base64.b64decode(image_base64_string)
+
+    # Convert the raw bytes to an image object
+    image = Image.open(io.BytesIO(image_bytes))
+    return image.tobytes()
+
 def inference(model_inputs: dict) -> dict:
     global model
 
     # Parse out your arguments
-    print(model_inputs)
     prompt = model_inputs.get('prompt', None)
     if prompt == None:
         return {'message': "No prompt provided"}
 
     # Run the model
-    input = model_inputs.get('image')
+    input_base64_string = model_inputs.get('image')
+    mask_base64_string = model_inputs.get('mask')
     # RGB
-    # Base64 encoded image string
-    base64_string = model_inputs.get('image').read()
-    # Decode the Base64 string to raw bytes
-    image_bytes = base64.b64decode(base64_string)
-
-    # Convert the raw bytes to an image object
-    image = Image.open(io.BytesIO(image_bytes))
 
     # Convert the image object to RGB bytes
-    origin_image_bytes = image.tobytes()
+    origin_image_bytes = get_image_bytes(input_base64_string)
     image, alpha_channel, exif = load_img(origin_image_bytes, return_exif=True)
 
-    # Base64 encoded image string
-    base64_string = model_inputs.get('mask').read()
-    # Decode the Base64 string to raw bytes
-    image_bytes = base64.b64decode(base64_string)
-
-    # Convert the raw bytes to an image object
-    image = Image.open(io.BytesIO(image_bytes))
-
     # Convert the image object to RGB bytes
-    mask_bytes = image.tobytes()
+    mask_bytes = get_image_bytes(mask_base64_string)
 
     mask, _ = load_img(mask_bytes, gray=True)
     mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)[1]
