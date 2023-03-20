@@ -11,6 +11,8 @@ RUN pip3 install --upgrade pip
 ADD requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
+ARG HF_AUTH_TOKEN
+
 # We add the banana boilerplate here
 ADD server.py .
 

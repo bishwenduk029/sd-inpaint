@@ -3,6 +3,7 @@ import cv2
 import io
 import numpy as np
 import random
+import os
 import imghdr
 from pathlib import Path
 from typing import Union
@@ -25,12 +26,13 @@ from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
 
 def init():
     global model
+    hf_auth_token = os.getenv("HF_AUTH_TOKEN")
 
     torch_dtype = torch.float16
     model = model = StableDiffusionInpaintPipeline.from_pretrained(
         "runwayml/stable-diffusion-inpainting",
         torch_dtype=torch_dtype,
-        use_auth_token=HF_AUTH_TOKEN
+        use_auth_token=hf_auth_token
     )
 
 # Inference is ran for every server call
