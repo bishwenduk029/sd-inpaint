@@ -8,3 +8,4 @@ transformers>=4.25.1
 tqdm
 pydantic
 requests
+xformers
