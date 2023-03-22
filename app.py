@@ -8,6 +8,7 @@ import imghdr
 from pathlib import Path
 from typing import Union
 from PIL import Image
+from paint_by_example import PaintByExample
 import sd
 import requests
 import schema
@@ -18,7 +19,7 @@ from helper import (
     pil_to_bytes,
 )
 import base64
-from diffusers.pipelines.stable_diffusion import StableDiffusionInpaintPipeline
+from diffusers import DiffusionPipeline
 
 # Init is ran on server startup
 # Load your model to GPU as a global variable here using the variable name "model"
@@ -29,8 +30,8 @@ def init():
     hf_auth_token = os.getenv("HF_AUTH_TOKEN")
 
     torch_dtype = torch.float16
-    model = StableDiffusionInpaintPipeline.from_pretrained(
-        "runwayml/stable-diffusion-inpainting",
+    model = DiffusionPipeline.from_pretrained(
+        "Fantasy-Studio/Paint-by-Example",
         torch_dtype=torch_dtype,
         revision="fp16",
         use_auth_token=hf_auth_token
@@ -58,7 +59,7 @@ def get_image_bytes(image_url: str):
 def inference(model_inputs: dict) -> dict:
     global model
 
-    inpaint_model = sd.SD15(model)
+    inpaint_model = PaintByExample(model)
 
     # Run the model
     input_url = model_inputs.get('image')

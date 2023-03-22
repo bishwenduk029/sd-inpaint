@@ -2,11 +2,10 @@ import PIL
 import PIL.Image
 import cv2
 import torch
-from diffusers import DiffusionPipeline
 
-from .base import DiffusionInpaintModel
-from .utils import set_seed
-from .schema import Config
+from base import DiffusionInpaintModel
+from utils import set_seed
+from schema import Config
 
 
 class PaintByExample(DiffusionInpaintModel):
@@ -14,34 +13,8 @@ class PaintByExample(DiffusionInpaintModel):
     pad_mod = 8
     min_size = 512
 
-    def init_model(self, device: torch.device, **kwargs):
-        fp16 = not kwargs.get('no_half', False)
-        use_gpu = device == torch.device('cuda') and torch.cuda.is_available()
-        torch_dtype = torch.float16 if use_gpu and fp16 else torch.float32
-        model_kwargs = {"local_files_only": kwargs.get('local_files_only', False)}
-
-        if kwargs['disable_nsfw'] or kwargs.get('cpu_offload', False):
-            model_kwargs.update(dict(
-                safety_checker=None,
-                requires_safety_checker=False
-            ))
-
-        self.model = DiffusionPipeline.from_pretrained(
-            "Fantasy-Studio/Paint-by-Example",
-            torch_dtype=torch_dtype,
-            **model_kwargs
-        )
-
-        self.model.enable_attention_slicing()
-        if kwargs.get('enable_xformers', False):
-            self.model.enable_xformers_memory_efficient_attention()
-
-        # TODO: gpu_id
-        if kwargs.get('cpu_offload', False) and use_gpu:
-            self.model.image_encoder = self.model.image_encoder.to(device)
-            self.model.enable_sequential_cpu_offload(gpu_id=0)
-        else:
-            self.model = self.model.to(device)
+    def init_model(self, model, **kwargs):
+        self.model = model
 
     def forward(self, image, mask, config: Config):
         """Input image and output image have same size
