@@ -94,7 +94,7 @@ def inference(model_inputs: dict) -> dict:
     else:
         size_limit = int(size_limit)
 
-    paint_by_example_example_image_url = form['paint_by_example_example_image']
+    paint_by_example_example_image_url = form['paintByExampleImage']
     paint_by_example_example_image_bytes = get_image_bytes(paint_by_example_example_image_url)
     paint_by_example_example_image = load_img(paint_by_example_example_image_bytes)
 
