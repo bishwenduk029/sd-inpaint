@@ -33,7 +33,6 @@ def init():
     model = DiffusionPipeline.from_pretrained(
         "Fantasy-Studio/Paint-by-Example",
         torch_dtype=torch_dtype,
-        revision="fp16",
         use_auth_token=hf_auth_token
     ).to("cuda")
 
