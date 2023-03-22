@@ -34,7 +34,7 @@ def init():
         torch_dtype=torch_dtype,
         revision="fp16",
         use_auth_token=hf_auth_token
-    ).enable_xformers_memory_efficient_attention().to("cuda")
+    ).to("cuda")
 
 # Inference is ran for every server call
 # Reference your preloaded global model variable here.
