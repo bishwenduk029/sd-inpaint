@@ -29,7 +29,7 @@ def init():
     hf_auth_token = os.getenv("HF_AUTH_TOKEN")
 
     torch_dtype = torch.float16
-    model = model = StableDiffusionInpaintPipeline.from_pretrained(
+    model = StableDiffusionInpaintPipeline.from_pretrained(
         "runwayml/stable-diffusion-inpainting",
         torch_dtype=torch_dtype,
         revision="fp16",
