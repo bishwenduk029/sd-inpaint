@@ -30,6 +30,7 @@ ADD __init__.py .
 ADD schema.py .
 ADD sd.py .
 ADD app.py .
+ADD paint_by_example.py .
 
 EXPOSE 8000
 
